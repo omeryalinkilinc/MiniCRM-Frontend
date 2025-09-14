@@ -1,6 +1,29 @@
-import React from "react";
-
+"use client";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 const page = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    const res = await fetch("http://localhost:5270/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      router.push("/dashboard");
+      console.log("Token:", data.token);
+    } else {
+      console.error("Login failed:", data.message);
+    }
+  };
+
   return (
     <div className="flex justify-center h-screen items-center">
       <div>
@@ -39,15 +62,28 @@ const page = () => {
           <h2 className="font-bold text-xl">Log in</h2>
           <div className="flex flex-col mt-4">
             <label className="pb-1">Email Address</label>
-            <input className="border rounded pl-1 h-[30px]" type="text" />
+            <input
+              className="border rounded pl-1 h-[30px]"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
 
           <div className="flex flex-col mt-3">
             <label className="pb-1">Password</label>
-            <input className="border rounded pl-1 h-[30px]" type="text" />
+            <input
+              className="border rounded pl-1 h-[30px]"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <div className="flex justify-center mt-3">
-            <button className="flex justify-center bg-[#2371f3] p-1 pl-2 pr-2 text-white mt-2 cursor-pointer rounded w-full">
+            <button
+              className="flex justify-center bg-[#2371f3] p-1 pl-2 pr-2 text-white mt-2 cursor-pointer rounded w-full"
+              onClick={handleLogin}
+            >
               Login
             </button>
           </div>
