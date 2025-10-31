@@ -1,0 +1,10 @@
+export const getCustomerInfo = async () => {
+  const res = await fetch("http://localhost:5270/api/customer/info", {
+    credentials: "include",
+    method: "GET",
+  });
+
+  if (!res.ok) throw new Error("Müşteri bilgisi alınamadı");
+
+  return res.json();
+};

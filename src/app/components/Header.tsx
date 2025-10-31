@@ -1,7 +1,11 @@
 "use client";
-import { useRouter } from "next/navigation";
-
-import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Avatar } from "@mantine/core";
+import { Cog6ToothIcon } from "@heroicons/react/24/solid";
+import { BellIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+import { Menu } from "@mantine/core";
+import { getInitials } from "@/app/utils/string";
 
 const Header = () => {
   const router = useRouter();
@@ -20,24 +24,77 @@ const Header = () => {
     }
   };
 
+  const pathname = usePathname();
+  const titles = {
+    dashboard: "Panel",
+    customers: "Müşteriler",
+    reports: "Raporlar",
+    settings: "Ayarlar",
+    home: "Ana Sayfa",
+    transactions: "İşlemlerim",
+    help: "Destek",
+  };
+
+  const rawPath = pathname.split("/")[1] || "dashboard";
+  const pageTitle = titles[rawPath as keyof typeof titles] || "Panel";
+
+  type User = {
+    fullName: string;
+    email: string;
+    photoUrl?: string;
+  };
+
+  const [user, setUser] = useState<{ fullName: string; email: string } | null>(
+    null
+  );
+
+  useEffect(() => {
+    fetch("http://localhost:5270/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        setUser({
+          fullName: data.user.fullName,
+          email: data.user.email,
+        });
+      });
+  }, []);
+
   return (
-    <div className="h-[80px] pr-4 pl-4 flex items-center bg-[#fafcfe] flex-1">
+    <div className="h-[80px] pr-4 pl-4 flex items-center bg-[#fff] flex-1">
       <div className="w-full flex justify-between items-center">
         <div>
-          <h1 className="font-bold text-3xl">Dashboard </h1>
+          <h1 className="font-bold text-3xl">{pageTitle} </h1>
         </div>
 
         <div>
-          <ul className="flex gap-4">
-            <li>Hoş Geldin,Ömer</li>
-            <li>Exper</li>
-            <li>
-              <button
-                className="bg-red-600 p-1 py-2 rounded cursor-pointer"
-                onClick={handleLogout}
-              >
-                Çıkış
-              </button>
+          <ul className="flex gap-6 items-center">
+            <li className="cursor-pointer">
+              <BellIcon className="w-6 h-6" />
+            </li>
+
+            <li className="flex items-center gap-1">
+              <span>Hoş Geldin, {user?.fullName}</span>
+
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <Avatar
+                    radius="xl"
+                    size="md"
+                    color="cyan"
+                    className="cursor-pointer"
+                  >
+                    {user?.fullName ? getInitials(user.fullName) : "?"}
+                  </Avatar>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Label>{user?.fullName}</Menu.Label>
+                  <Menu.Item onClick={() => router.push("/settings")}>
+                    Profil Ayarları
+                  </Menu.Item>
+                  <Menu.Item onClick={handleLogout}>Çıkış Yap</Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </li>
           </ul>
         </div>
