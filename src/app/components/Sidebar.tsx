@@ -32,14 +32,14 @@ const Sidebar = ({ role }: { role: Role }) => {
             href: "/customers",
           },
           {
+            label: "Support",
+            icon: <QuestionMarkCircleIcon className="w-5 h-5" />,
+            href: "/support",
+          },
+          {
             label: "Reports",
             icon: <DocumentChartBarIcon className="w-5 h-5" />,
             href: "/reports",
-          },
-          {
-            label: "Settings",
-            icon: <Cog6ToothIcon className="w-5 h-5" />,
-            href: "/settings",
           },
         ]
       : [
@@ -62,12 +62,12 @@ const Sidebar = ({ role }: { role: Role }) => {
           {
             label: "Settings",
             icon: <Cog6ToothIcon className="w-5 h-5" />,
-            href: "/settings",
+            href: "/customer/settings",
           },
         ];
 
   return (
-    <div className="hidden md:block bg-[#1b2d4b] w-[250px] h-screen">
+    <div className="w-full h-full bg-[#0F1729]">
       <div className="flex flex-col items-center">
         <div className="p-4 pt-[28px]">
           <h1 className="font-bold text-white text-2xl">MiniCRM</h1>
@@ -82,7 +82,7 @@ const Sidebar = ({ role }: { role: Role }) => {
                   key={item.label}
                   onClick={() => router.push(item.href)}
                   className={`w-full pl-4 py-2 rounded cursor-pointer text-white text-lg text-left font-semibold flex items-center gap-3
-                    ${isActive ? "bg-[#70a1e8]" : "hover:bg-blue-400"}`}
+                    ${isActive ? "bg-[#3C83F6]" : "hover:bg-[#3C83F6]"}`}
                 >
                   {item.icon}
                   {item.label}

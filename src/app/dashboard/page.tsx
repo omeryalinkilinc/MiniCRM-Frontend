@@ -42,6 +42,8 @@ import {
   fetchRecentTransactions,
 } from "./data";
 import { Group, Text, Box } from "@mantine/core";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../hooks/useAuth";
 
 const pieDescription = [
   { name: "Bireysel", color: "#4c6ef5" },
@@ -139,6 +141,8 @@ const Page = () => {
     });
   }, []);
 
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
   useEffect(() => {
     if (gridRef.current) {
       GridStack.init(
@@ -161,7 +165,7 @@ const Page = () => {
         gridRef.current
       );
     }
-  }, []);
+  }, [isAuthorized]);
 
   const [customerGrowth, setCustomerGrowth] = useState<number | null>(null);
 
@@ -178,7 +182,7 @@ const Page = () => {
         const txDate = new Date(tx.date);
         const diffMs = now.getTime() - txDate.getTime();
         const diffHrs = diffMs / (1000 * 60 * 60);
-        return diffHrs <= 24;
+        return diffHrs <= 168; // 7 gün = 168 saat
       });
 
       const formatted = filtered.map((tx: Transaction) => ({
@@ -196,314 +200,326 @@ const Page = () => {
     });
   }, []);
 
+  const { role, loading } = useAuth();
+  if (loading || !role) return null;
+
   return (
-    <Layout>
-      <div className="grid-stack px-2 overflow-x-hidden" ref={gridRef}>
-        <div
-          className="grid-stack-item"
-          gs-id="calendar"
-          gs-x="12"
-          gs-y="0"
-          gs-w="2"
-          gs-h="1"
-        >
-          <div className="grid-stack-item-content flex justify-center self-start">
-            <MiniCalendar
-              value={value}
-              onChange={setValue}
-              numberOfDays={6}
-              w="100%"
-              className="justify-end"
-            />
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
-          gs-id="toplam-musteri-card"
-          gs-x="0"
-          gs-y="1"
-          gs-w="3"
-          gs-h="2"
-        >
-          <div className="grid-stack-item-content">
-            <div className="flex items-center justify-between h-full p-5">
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-medium  text-[#657182]">
-                  Toplam Müşteri
-                </span>
-                <span className="font-sans font-bold text-2xl">
-                  {" "}
-                  {customerCount !== null ? customerCount : "Yükleniyor..."}
-                </span>
-                <div className="flex justify-between gap-4  items-center">
-                  <div className="flex items-center gap-2">
-                    {customerGrowth !== null && customerGrowth > 0 ? (
-                      <ArrowUpIcon className="w-8 h-8 text-[#8ad8ae]" />
-                    ) : (
-                      <ArrowDownIcon className="w-8 h-8 text-[#f87171]" />
-                    )}
-                    <span
-                      className={`font-bold text-3xl min-w-[80px] ${
-                        customerGrowth !== null
-                          ? customerGrowth > 0
-                            ? "text-[#8ad8ae]"
-                            : "text-[#f87171]"
-                          : ""
-                      }`}
-                    >
-                      {customerGrowth !== null
-                        ? `${customerGrowth.toFixed(0)}%`
-                        : "Yükleniyor..."}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="">
-                <UserGroupIcon className="w-8 h-8" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
-          gs-id="toplam-musteri-card"
-          gs-x="3"
-          gs-y="1"
-          gs-w="3"
-          gs-h="2"
-        >
-          <div className="grid-stack-item-content">
-            <div className="flex items-center justify-between h-full p-5">
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-medium  text-[#657182]">
-                  Toplam İşlem Sayısı
-                </span>
-                <span className="font-bold text-3xl">
-                  {transactionCount !== null
-                    ? transactionCount
-                    : "Yükleniyor..."}
-                </span>
-                <div className="flex justify-between gap-4  items-center"></div>
-              </div>
-              <div className="">
-                <CreditCardIcon className="w-8 h-8" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
-          gs-id="aktif-kullanici-card"
-          gs-x="6"
-          gs-y="1"
-          gs-w="3"
-          gs-h="2"
-        >
-          <div className="grid-stack-item-content  ">
-            <div className="flex items-center justify-between h-full p-5">
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-medium  text-[#657182]">
-                  Aktif Kullanıcı Sayısı
-                </span>
-                <span className="font-bold text-3xl">
-                  {customerCount !== null ? customerCount : "Yükleniyor..."}{" "}
-                </span>
-                <div className="flex justify-between gap-4  items-center"></div>
-              </div>
-              <div className="">
-                <UserIcon className="w-6 h-6 text-gray-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
-          gs-id="aktif-kullanici-card"
-          gs-x="9"
-          gs-y="1"
-          gs-w="3"
-          gs-h="2"
-        >
-          <div className="grid-stack-item-content  ">
-            <div className="flex items-center justify-between h-full p-5">
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-medium  text-[#657182]">
-                  Gelir Artışı
-                </span>
-                <span className="font-bold text-3xl">---</span>
-                <div className="flex justify-between gap-4  items-center"></div>
-              </div>
-              <div className="">
-                <ArrowTrendingUpIcon className="w-6 h-6 text-gray-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
-          gs-id="hizli-islem"
-          gs-x="0"
-          gs-y="3"
-          gs-w="5"
-          gs-h="5"
-        >
-          <div className="grid-stack-item-content">
-            <div className="p-4">
-              <h1 className="font-sans font-bold text-2xl mt-1 mb-1 p-2 ">
-                Hızlı Aksiyonlar
-              </h1>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
-                  <UserPlusIcon className="w-8 h-8" />
-                  <span className="mt-1">Add Customer</span>
-                </div>
-                <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
-                  <DocumentTextIcon className="w-8 h-8" />
-                  <span className="mt-1">Generate Report</span>
-                </div>
-                <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
-                  <EnvelopeIcon className="w-8 h-8" />
-                  <span>Send Campaign</span>
-                </div>
-                <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
-                  <CurrencyDollarIcon className="w-8 h-8" />
-                  <span>New Transaction</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8]  rounded-xl bg-[#fff]"
-          gs-id="son-etkinlik-card"
-          gs-x="8"
-          gs-y="3"
-          gs-w="7"
-          gs-h="5"
-        >
-          <div className="grid-stack-item-content">
-            <div className="grid-stack-item-content p-4">
-              <h3 className="font-bold text-xl mb-4">Son Etkinlikler</h3>
-              <ul className="space-y-4">
-                {activities.map((activity) => (
-                  <li
-                    key={activity.id}
-                    className="flex justify-between items-center"
-                  >
-                    <div className="flex gap-3 items-center">
-                      <div className="bg-blue-100 text-blue-800 font-bold rounded-full w-10 h-10 flex items-center justify-center">
-                        {activity.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{activity.fullName}</div>
-                        <div className="text-sm text-gray-600">
-                          {activity.description}
-                        </div>
-                        {activity.amount && (
-                          <div className="text-sm font-bold text-gray-800">
-                            ₺{activity.amount.toLocaleString("tr-TR")}
-                          </div>
-                        )}
-                        <div className="text-xs text-gray-400">
-                          {activity.timeAgo}
-                        </div>
-                      </div>
-                    </div>
-                    <span
-                      className={`p-2 rounded text-sm font-medium  rounded-xl ${
-                        activity.status === "TAMAMLANDI"
-                          ? "bg-green-100 text-green-700"
-                          : activity.status === "BEKLEMEDE"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {activity.status}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-3 border-[#f3f5f8]  rounded-xl"
-          gs-id="müsteri-segment-card"
-          gs-x="9"
-          gs-y="8"
-          gs-w="6"
-          gs-h="6"
-        >
-          <div className="grid-stack-item-content">
-            <div className="bg-white  shadow w-full  h-full">
-              <h2 className="font-sans font-bold text-2xl ">
-                Müşteri Segmentleri
-              </h2>
-              <Box>
-                <PieChart
-                  h={400}
-                  w="100%"
-                  data={pieData}
-                  withTooltip
-                  withLabels
-                />
-
-                {/* Legend */}
-                <Group justify="center">
-                  {pieDescription.map((item) => (
-                    <Group key={item.name}>
-                      <Box
-                        w={12}
-                        h={12}
-                        bg={item.color}
-                        style={{ borderRadius: 2 }}
-                      />
-                      <Text>{item.name}</Text>
-                    </Group>
-                  ))}
-                </Group>
-              </Box>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="grid-stack-item border-[#f3f5f8] rounded-xl"
-          gs-id="islem-hacim-card"
-          gs-x="0"
-          gs-y="5"
-          gs-w="6"
-          gs-h="6"
-        >
-          <div className="grid-stack-item-content">
-            <div className="bg-white p-4 rounded shadow w-full">
-              <h2 className="text-lg font-bold mb-2">İşlem Hacmi</h2>
-              <BarChart
+    <Layout role={role}>
+      <ProtectedRoute
+        allowed={["admin"]}
+        onAuthorized={() => setIsAuthorized(true)}
+      >
+        <div className="grid-stack px-2 overflow-x-hidden" ref={gridRef}>
+          <div
+            className="grid-stack-item"
+            gs-id="calendar"
+            gs-x="12"
+            gs-y="0"
+            gs-w="2"
+            gs-h="1"
+          >
+            <div className="grid-stack-item-content flex justify-center self-start">
+              <MiniCalendar
+                value={value}
+                onChange={setValue}
+                numberOfDays={6}
                 w="100%"
-                h={550}
-                data={mounthlyTransactionVolume}
-                dataKey="month"
-                series={[{ name: "count", color: "violet.6" }]}
-                tickLine="y"
-                withLegend
-                minBarSize={20}
-                maxBarWidth={50}
+                className="justify-end"
               />
             </div>
           </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
+            gs-id="toplam-musteri-card"
+            gs-x="0"
+            gs-y="1"
+            gs-w="3"
+            gs-h="2"
+          >
+            <div className="grid-stack-item-content">
+              <div className="flex items-center justify-between h-full p-5">
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg font-medium  text-[#657182]">
+                    Toplam Müşteri
+                  </span>
+                  <span className="font-sans font-bold text-2xl">
+                    {" "}
+                    {customerCount !== null ? customerCount : "Yükleniyor..."}
+                  </span>
+                  <div className="flex justify-between gap-4  items-center">
+                    <div className="flex items-center gap-2">
+                      {customerGrowth !== null && customerGrowth > 0 ? (
+                        <ArrowUpIcon className="w-8 h-8 text-[#8ad8ae]" />
+                      ) : (
+                        <ArrowDownIcon className="w-8 h-8 text-[#f87171]" />
+                      )}
+                      <span
+                        className={`font-bold text-3xl min-w-[80px] ${
+                          customerGrowth !== null
+                            ? customerGrowth > 0
+                              ? "text-[#8ad8ae]"
+                              : "text-[#f87171]"
+                            : ""
+                        }`}
+                      >
+                        {customerGrowth !== null
+                          ? `${customerGrowth.toFixed(0)}%`
+                          : "Yükleniyor..."}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="">
+                  <UserGroupIcon className="w-8 h-8" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
+            gs-id="toplam-musteri-card"
+            gs-x="3"
+            gs-y="1"
+            gs-w="3"
+            gs-h="2"
+          >
+            <div className="grid-stack-item-content">
+              <div className="flex items-center justify-between h-full p-5">
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg font-medium  text-[#657182]">
+                    Toplam İşlem Sayısı
+                  </span>
+                  <span className="font-bold text-3xl">
+                    {transactionCount !== null
+                      ? transactionCount
+                      : "Yükleniyor..."}
+                  </span>
+                  <div className="flex justify-between gap-4  items-center"></div>
+                </div>
+                <div className="">
+                  <CreditCardIcon className="w-8 h-8" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
+            gs-id="aktif-kullanici-card"
+            gs-x="6"
+            gs-y="1"
+            gs-w="3"
+            gs-h="2"
+          >
+            <div className="grid-stack-item-content  ">
+              <div className="flex items-center justify-between h-full p-5">
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg font-medium  text-[#657182]">
+                    Aktif Kullanıcı Sayısı
+                  </span>
+                  <span className="font-bold text-3xl">
+                    {customerCount !== null ? customerCount : "Yükleniyor..."}{" "}
+                  </span>
+                  <div className="flex justify-between gap-4  items-center"></div>
+                </div>
+                <div className="">
+                  <UserIcon className="w-6 h-6 text-gray-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
+            gs-id="aktif-kullanici-card"
+            gs-x="9"
+            gs-y="1"
+            gs-w="3"
+            gs-h="2"
+          >
+            <div className="grid-stack-item-content  ">
+              <div className="flex items-center justify-between h-full p-5">
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg font-medium  text-[#657182]">
+                    Gelir Artışı
+                  </span>
+                  <span className="font-bold text-3xl">---</span>
+                  <div className="flex justify-between gap-4  items-center"></div>
+                </div>
+                <div className="">
+                  <ArrowTrendingUpIcon className="w-6 h-6 text-gray-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8] rounded-xl bg-[#fff]"
+            gs-id="hizli-islem"
+            gs-x="0"
+            gs-y="3"
+            gs-w="5"
+            gs-h="5"
+          >
+            <div className="grid-stack-item-content">
+              <div className="p-4">
+                <h1 className="font-sans font-bold text-2xl mt-1 mb-1 p-2 ">
+                  Hızlı Aksiyonlar
+                </h1>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
+                    <UserPlusIcon className="w-8 h-8" />
+                    <span className="mt-1">Add Customer</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
+                    <DocumentTextIcon className="w-8 h-8" />
+                    <span className="mt-1">Generate Report</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
+                    <EnvelopeIcon className="w-8 h-8" />
+                    <span>Send Campaign</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-[#F8FAFC] p-2 py-3 rounded-xl cursor-pointer hover:bg-[#11B4D4] hover:text-white">
+                    <CurrencyDollarIcon className="w-8 h-8" />
+                    <span>New Transaction</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8]  rounded-xl bg-[#fff]"
+            gs-id="son-etkinlik-card"
+            gs-x="8"
+            gs-y="3"
+            gs-w="7"
+            gs-h="5"
+          >
+            <div className="grid-stack-item-content">
+              <div className="grid-stack-item-content p-4">
+                <h3 className="font-bold text-xl mb-4">Son Etkinlikler</h3>
+                <ul className="space-y-4">
+                  {activities.map((activity) => (
+                    <li
+                      key={activity.id}
+                      className="flex justify-between items-center"
+                    >
+                      <div className="flex gap-3 items-center">
+                        <div className="bg-blue-100 text-blue-800 font-bold rounded-full w-10 h-10 flex items-center justify-center">
+                          {activity.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-semibold">
+                            {activity.fullName}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {activity.description}
+                          </div>
+                          {activity.amount && (
+                            <div className="text-sm font-bold text-gray-800">
+                              ₺{activity.amount.toLocaleString("tr-TR")}
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-400">
+                            {activity.timeAgo}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        className={`p-2 rounded text-sm font-medium  rounded-xl ${
+                          activity.status === "TAMAMLANDI"
+                            ? "bg-green-100 text-green-700"
+                            : activity.status === "BEKLEMEDE"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {activity.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-3 border-[#f3f5f8]  rounded-xl"
+            gs-id="müsteri-segment-card"
+            gs-x="9"
+            gs-y="8"
+            gs-w="6"
+            gs-h="6"
+          >
+            <div className="grid-stack-item-content">
+              <div className="bg-white  shadow w-full  h-full">
+                <h2 className="font-sans font-bold text-2xl  p-4 ">
+                  Müşteri Segmentleri
+                </h2>
+                <Box>
+                  <PieChart
+                    h={400}
+                    w="100%"
+                    data={pieData}
+                    withTooltip
+                    withLabels
+                  />
+
+                  {/* Legend */}
+                  <Group justify="center">
+                    {pieDescription.map((item) => (
+                      <Group key={item.name}>
+                        <Box
+                          w={12}
+                          h={12}
+                          bg={item.color}
+                          style={{ borderRadius: 2 }}
+                        />
+                        <Text>{item.name}</Text>
+                      </Group>
+                    ))}
+                  </Group>
+                </Box>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="grid-stack-item border-[#f3f5f8] rounded-xl"
+            gs-id="islem-hacim-card"
+            gs-x="0"
+            gs-y="5"
+            gs-w="6"
+            gs-h="6"
+          >
+            <div className="grid-stack-item-content">
+              <div className="bg-white p-4 rounded shadow w-full">
+                <h2 className="font-sans font-bold text-2xl  p-4 ">
+                  İşlem Hacmi
+                </h2>
+                <BarChart
+                  w="100%"
+                  h={550}
+                  data={mounthlyTransactionVolume}
+                  dataKey="month"
+                  series={[{ name: "count", color: "violet.6" }]}
+                  tickLine="y"
+                  withLegend
+                  minBarSize={20}
+                  maxBarWidth={50}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </ProtectedRoute>
     </Layout>
   );
 };
