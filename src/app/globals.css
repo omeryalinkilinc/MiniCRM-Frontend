@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import "tailwindcss";
+@import "@mantine/core/styles.css";
 
 :root {
   --background: #ffffff;

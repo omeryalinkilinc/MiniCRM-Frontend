@@ -1,14 +1,19 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar } from "@mantine/core";
-import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { BellIcon } from "@heroicons/react/24/outline";
+import { BellIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
 import { Menu } from "@mantine/core";
 import { getInitials } from "@/app/utils/string";
+import { useAuth } from "../hooks/useAuth";
 
-const Header = () => {
+type HeaderProps = {
+  onToggleSidebar: () => void;
+};
+
+const Header = ({ onToggleSidebar }: HeaderProps) => {
   const router = useRouter();
+  const { role, loading } = useAuth();
 
   const handleLogout = async () => {
     const res = await fetch("http://localhost:5270/api/auth/logout", {
@@ -49,20 +54,33 @@ const Header = () => {
   );
 
   useEffect(() => {
-    fetch("http://localhost:5270/api/auth/me", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser({
-          fullName: data.user.fullName,
-          email: data.user.email,
+    if (!loading) {
+      fetch("http://localhost:5270/api/auth/me", {
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setUser({
+            fullName: data.user.fullName,
+            email: data.user.email,
+          });
+        })
+        .catch(() => {
+          setUser(null);
         });
-      });
-  }, []);
+    }
+  }, [loading]);
 
   return (
     <div className="h-[80px] pr-4 pl-4 flex items-center bg-[#fff] flex-1">
       <div className="w-full flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-4">
+          <button
+            className="cursor-pointer md:hidden"
+            onClick={onToggleSidebar}
+          >
+            <ViewColumnsIcon className="w-8 h-8" />
+          </button>
           <h1 className="font-bold text-3xl">{pageTitle} </h1>
         </div>
 

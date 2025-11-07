@@ -1,22 +1,37 @@
-import { URL } from "next/dist/compiled/@edge-runtime/primitives/url";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const role = request.cookies.get("role")?.value;
+  const path = request.nextUrl.pathname;
 
-  const url = request.nextUrl.pathname;
-
-  if (!token) return NextResponse.redirect(new URL("/login", request.url));
-
-  if (url.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("unauthorized", request.url));
+  // Token yoksa login'e yönlendir
+  if (!token) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (url.startsWith("/customer") && role !== "customer") {
-    return NextResponse.redirect(new URL("unauthorized", request.url));
+  // Admin route'una admin olmayan girerse unauthorized'a yönlendir
+  if (path.startsWith("/admin") && role !== "admin") {
+    const unauthorizedUrl = request.nextUrl.clone();
+    unauthorizedUrl.pathname = "/unauthorized";
+    return NextResponse.redirect(unauthorizedUrl);
   }
 
+  // Customer route'una customer olmayan girerse unauthorized'a yönlendir
+  if (path.startsWith("/customer") && role !== "customer") {
+    const unauthorizedUrl = request.nextUrl.clone();
+    unauthorizedUrl.pathname = "/unauthorized";
+    return NextResponse.redirect(unauthorizedUrl);
+  }
+
+  // Her şey uygunsa devam et
   return NextResponse.next();
 }
+
+// Sadece belirli route'larda çalışsın
+export const config = {
+  matcher: ["/admin/:path*", "/customer/:path*"],
+};
