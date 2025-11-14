@@ -191,9 +191,11 @@ const page = () => {
             className="w-full mt-6 table-fixed bg-[#fff] rounded-xl"
           >
             <thead className="bg-[#ffff] rounded-xl">
-              <div className="p-6">
-                <h5 className="font-bold text-xl">Tüm Müşteriler</h5>
-              </div>
+              <tr>
+                <th colSpan={5} className="p-6 text-left">
+                  <h5 className="font-bold text-xl">Tüm Müşteriler</h5>
+                </th>
+              </tr>
               <tr className="p-6">
                 <th className="w-[150px] text-left p-4 text-[#5C6673]">
                   Müşteri Türü
