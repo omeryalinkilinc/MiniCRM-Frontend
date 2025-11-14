@@ -35,7 +35,6 @@ import {
   getCustomerCount,
   getCustomerSegments,
   Areadata,
-  getTransactionCount,
   getTransactionVolume,
   getCustomerGrowth,
   getMonthlyTransactionVolume,
@@ -44,6 +43,7 @@ import {
 import { Group, Text, Box } from "@mantine/core";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
+import { getTransactionCount } from "@/lib/api/totalTransaction";
 
 const pieDescription = [
   { name: "Bireysel", color: "#4c6ef5" },
@@ -176,16 +176,15 @@ const Page = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   useEffect(() => {
     fetchRecentTransactions().then((data: Transaction[]) => {
-      const now = new Date();
+      // Tarihe göre sıralama (en yeni en başta olacak şekilde)
+      const sorted = data.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
 
-      const filtered = data.filter((tx: Transaction) => {
-        const txDate = new Date(tx.date);
-        const diffMs = now.getTime() - txDate.getTime();
-        const diffHrs = diffMs / (1000 * 60 * 60);
-        return diffHrs <= 168; // 7 gün = 168 saat
-      });
+      // Son 7 işlemi al
+      const latestSeven = sorted.slice(0, 7);
 
-      const formatted = filtered.map((tx: Transaction) => ({
+      const formatted = latestSeven.map((tx: Transaction) => ({
         id: tx.id,
         fullName: tx.customer?.name || "Bilinmeyen",
         companyName: tx.customer.companyName,
