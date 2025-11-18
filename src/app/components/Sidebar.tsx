@@ -9,6 +9,7 @@ import {
   UserIcon,
   ReceiptPercentIcon,
   QuestionMarkCircleIcon,
+  WalletIcon,
 } from "@heroicons/react/24/solid";
 
 type Role = "admin" | "customer";
@@ -52,6 +53,11 @@ const Sidebar = ({ role }: { role: Role }) => {
             label: "İşlemlerim",
             icon: <ReceiptPercentIcon className="w-5 h-5" />,
             href: "/customer/transactions",
+          },
+          {
+            label: "Ödeme İşlemleri",
+            icon: <WalletIcon className="w-5 h-5" />,
+            href: "/customer/payments",
           },
 
           {

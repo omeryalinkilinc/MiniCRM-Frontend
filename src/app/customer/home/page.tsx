@@ -34,6 +34,7 @@ import { LineChart } from "@mantine/charts";
 import { Linedata } from "./data";
 import { useAuth } from "@/app/hooks/useAuth";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
+import { getCurrentUser } from "@/lib/api/auth";
 type Transaction = {
   id?: number;
   transactionType: string;
@@ -75,14 +76,9 @@ const page = () => {
   );
 
   useEffect(() => {
-    fetch("http://localhost:5270/api/auth/me", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser({
-          fullName: data.user.fullName,
-          email: data.user.email,
-        });
-      });
+    getCurrentUser()
+      .then(setUser)
+      .catch((err) => console.error(err));
   }, []);
 
   type CurrencyRates = {
