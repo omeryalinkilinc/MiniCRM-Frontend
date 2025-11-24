@@ -1,8 +1,8 @@
 import React from "react";
 import ProfileCard from "./ProfileCard";
 import SecurityCard from "./SecurityCard";
-import NotificationsCard from "./NotificationsCard ";
-import PreferencesCard from "./PreferencesCard ";
+import NotificationsCard from "./NotificationsCard";
+import PreferencesCard from "./PreferencesCard";
 
 type Props = {
   activeTab: string;
