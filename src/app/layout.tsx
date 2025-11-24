@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MantineProvider } from "@mantine/core";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/context/useAuth"; // ✅ ekle
 
 // Inter font (UI fontu)
 const inter = Inter({
@@ -31,11 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${geistMono.variable} font-sans antialiased  min-h-screen`}
+        className={`${inter.variable} ${geistMono.variable} font-sans antialiased min-h-screen`}
       >
         <MantineProvider theme={{}}>
           <Toaster position="top-right" reverseOrder={false} />
-          {children}
+          {/* ✅ tüm uygulamayı AuthProvider ile sarmala */}
+          <AuthProvider>{children}</AuthProvider>
         </MantineProvider>
       </body>
     </html>
